@@ -1,0 +1,22 @@
+{
+  "name": "bs_backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zangfenziang/BS_backend.git"
+  },
+  "author": "zangfenziang@126.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zangfenziang/BS_backend/issues"
+  },
+  "homepage": "https://github.com/zangfenziang/BS_backend#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
