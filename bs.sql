@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jun 28, 2019 at 03:30 AM
+-- Generation Time: Jun 28, 2019 at 01:13 PM
 -- Server version: 10.2.22-MariaDB
 -- PHP Version: 7.2.18
 
@@ -50,6 +50,18 @@ CREATE TABLE `book` (
 CREATE TABLE `booktype` (
   `bid` int(11) NOT NULL,
   `tid` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `broadcast`
+--
+
+CREATE TABLE `broadcast` (
+  `cid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  `message` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -121,6 +133,12 @@ ALTER TABLE `booktype`
   ADD PRIMARY KEY (`bid`,`tid`);
 
 --
+-- Indexes for table `broadcast`
+--
+ALTER TABLE `broadcast`
+  ADD PRIMARY KEY (`cid`);
+
+--
 -- Indexes for table `message`
 --
 ALTER TABLE `message`
@@ -153,6 +171,12 @@ ALTER TABLE `user`
 --
 ALTER TABLE `book`
   MODIFY `bid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `broadcast`
+--
+ALTER TABLE `broadcast`
+  MODIFY `cid` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `message`

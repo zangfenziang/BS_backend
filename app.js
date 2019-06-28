@@ -647,6 +647,69 @@ app.post(addition + '/message/list', (req, res)=>{
     )
 })
 
+app.post(addition + '/broadcast/send', (req, res)=>{
+    if (!req.uid){
+        res.json({
+            status: -1,
+            message: 'please login first'
+        })
+        return;
+    }
+    const uid = req.uid;
+    const message = req.body.message;
+    const conn = mysql.createConnection(config.mysql);
+    conn.query('insert into broadcast(uid, message) values(?, ?)', [uid, message], (err, results, fields) => {
+        if (err){
+            console.error(err);
+            res.json({
+                status: 1,
+                message: 'query database fail'
+            });
+        }
+        else{
+            if (results.affectedRows == 0){
+                res.json({
+                    status: 1,
+                    message: 'insert into database fail'
+                })
+            }
+            else{
+                res.json({
+                    status: 0
+                })
+            }
+        }
+        conn.end();
+    })
+})
+
+app.post(addition + '/broadcast/list', (req, res)=>{
+    if (!req.uid){
+        res.json({
+            status: -1,
+            message: 'please login first'
+        })
+        return;
+    }
+    const conn = mysql.createConnection(config.mysql);
+    conn.query('select * from broadcast', (err, results, fields)=>{
+        if (err){
+            console.error(err);
+            res.json({
+                status: 1,
+                message: 'query database fail'
+            });
+        }
+        else{
+            res.json({
+                status: 0,
+                broadcast: results
+            })
+        }
+        conn.end();
+    })
+})
+
 app.listen(port, (err)=>{
     if (!err){
         console.log('app start at ' + port + ' port');
