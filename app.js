@@ -85,7 +85,7 @@ app.get('/', (req, res)=>{
     res.sendFile(__dirname + '/index.html');
 })
 
-app.post(addition + '/register', (req, res)=>{
+app.post(addition + '/user/register', (req, res)=>{
     const username = req.body.username;
     let password = req.body.password;
     const email = req.body.email;
@@ -149,7 +149,7 @@ app.post(addition + '/register', (req, res)=>{
     }
 })
 
-app.post(addition + '/login', (req, res)=>{
+app.post(addition + '/user/login', (req, res)=>{
     const username = req.body.username;
     const password = encodePassword(req.body.password);
     const conn = mysql.createConnection(config.mysql);
@@ -223,6 +223,42 @@ app.post(addition + '/login', (req, res)=>{
     }
 })
 
+app.post(addition + '/user/find', (req, res)=>{
+    if (!req.uid){
+        res.json({
+            status: -1,
+            message: 'please login first'
+        });
+        return;
+    }
+    const uid = req.body.uid;
+    const conn = mysql.createConnection(config.mysql);
+    conn.query('select uid, username, email from user where uid = ?', [uid], (err, results, fields)=>{
+        if (err){
+            console.error(err);
+            res.json({
+                status: 1,
+                message: 'query database fail',
+            });
+        }
+        else{
+            if (results.length == 0){
+                res.json({
+                    status: 1,
+                    message: 'select from database fail',
+                })
+            }
+            else{
+                res.json({
+                    status: 0,
+                    user: results[0]
+                })
+            }
+        }
+        conn.end();
+    })
+})
+
 app.post(addition + '/upload', upload.single('image'), (req, res)=>{
     if (req.file){
         res.json({
@@ -238,7 +274,7 @@ app.post(addition + '/upload', upload.single('image'), (req, res)=>{
     }
 })
 
-app.post(addition + '/add', (req, res)=>{
+app.post(addition + '/book/add', (req, res)=>{
     if (!req.uid){
         res.json({
             status: -1,
@@ -380,15 +416,229 @@ app.post(addition + '/type/search', (req, res)=>{
     })
 })
 
-app.post(addition + '/list', (req, res)=>{
-    
+app.post(addition + '/book/list', (req, res)=>{
+    if (!req.uid){
+        res.json({
+            status: -1,
+            message: 'please login first'
+        })
+        return;
+    }
+    const bid = req.body.bid;
+    const left = req.body.left;
+    const right = req.body.right;
+    let str = 'select * from book where bid > 0';
+    let input = [];
+    if (bid && bid.length > 0){
+        str += ' and bid in (?';
+        input.push(bid[0]);
+        for (let i = 1; i < bid.length; ++i){
+            input.push(bid[i]);
+            str += ', ?'
+        }
+        str += ')';
+    }
+    if (left){
+        str += ' and bid >= ?';
+        input.push(left);
+    }
+    if (right){
+        str += ' and bid < ?';
+        input.push(right);
+    }
+    const conn = mysql.createConnection(config.mysql);
+    conn.query(str, input, (err, results, fields)=>{
+        if (err){
+            console.error(err);
+            res.json({
+                status: 1,
+                message: 'query database fail',
+            })
+        }
+        else{
+            res.json({
+                status: 0,
+                book: results
+            });
+        }
+        conn.end();
+    })
 })
 
-app.post(addition + '/buy', (req, res)=>{})
+app.post(addition + '/book/buy', (req, res)=>{
+    if (!req.uid){
+        res.json({
+            status: -1,
+            message: 'please login first'
+        })
+        return;
+    }
+    const uid = req.uid;
+    const bid = req.body.bid;
+    let type = req.body.type;
+    if (type != 2){
+        type = 1;
+    }
+    const conn = mysql.createConnection(config.mysql);
+    try{
+        conn.query('select status from book where bid = ?', [bid], (err, results, fields)=>{
+            if (err){
+                throw err;
+            }
+            if (results.length == 0){
+                res.json({
+                    status: 1,
+                    message: 'select bid from database fail'
+                });
+                conn.end();
+                return;
+            }
+            const status = results[0].status;
+            if (status != 0){
+                res.json({
+                    status: 1,
+                    message: 'book has been sold'
+                })
+                conn.end();
+                return;
+            }
+            conn.query('update book set status = ?, buyer = ? where bid = ? and status = 0', [type, uid, bid], (err, results, fields)=>{
+                if (err){
+                    throw err;
+                }
+                if (results.affectedRows == 0){
+                    res.json({
+                        status: 1,
+                        message: 'update database fail'
+                    })
+                }
+                else{
+                    res.json({
+                        status: 0,
+                    })
+                }
+                conn.end();
+            })
+        })
+    }
+    catch(err){
+        console.error(err);
+        res.json({
+            status: 1,
+            message: 'query database fail'
+        })
+        conn.end();
+    }
+})
 
-app.post(addition + '/send', (req, res)=>{})
+app.post(addition + '/booktype/add', (req, res)=>{
+    if (!req.uid){
+        res.json({
+            status: -1,
+            message: 'please login first'
+        })
+        return;
+    }
+    const bid = req.body.bid;
+    const tid = req.body.tid;
+    const conn = mysql.createConnection(config.mysql);
+    conn.query('insert into booktype(bid, tid) values(?, ?)', [bid, tid], (err, results, fields)=>{
+        if (err){
+            console.error(err);
+            res.json({
+                status: 1,
+                message: 'query database fail'
+            });
+        }
+        else{
+            if (results.affectedRows == 0){
+                res.json({
+                    status: 1,
+                    message: 'insert into database fail',
+                })
+            }
+            else{
+                res.json({
+                    status: 0,
+                })
+            }
+        }
+        conn.end();
+    })
+})
 
-app.post(addition + '/message', (req, res)=>{})
+app.post(addition + '/message/send', (req, res)=>{
+    if (!req.uid){
+        res.json({
+            status: -1,
+            message: 'please login first'
+        })
+        return;
+    }
+    const from_uid = req.uid;
+    const to_uid = req.body.to;
+    const message = req.body.message;
+    const conn = mysql.createConnection(config.mysql);
+    conn.query('insert into message(from_uid, to_uid, message, status) values(?, ?, ?, 0)'
+        , [from_uid, to_uid, message]
+        , (err, results, fields)=>{
+            if (err){
+                console.error(err);
+                res.json({
+                    status: 1,
+                    message: 'query database fail',
+                })
+            }
+            else if (results.affectedRows == 0){
+                res.json({
+                    status: 1,
+                    message: 'insert into database fail',
+                })
+            }
+            else{
+                res.json({
+                    status: 0,
+                })
+            }
+            conn.end();
+        }
+    )
+})
+
+app.post(addition + '/message/list', (req, res)=>{
+    if (!req.uid){
+        res.json({
+            status: -1,
+            message: 'please login first'
+        })
+        return;
+    }
+    const uid = req.uid;
+    let mid = req.body.mid;
+    if (mid == undefined){
+        mid = 0;
+    }
+    const conn = mysql.createConnection(config.mysql);
+    conn.query('select * from message where mid > ? and to_uid = ?'
+        , [mid, uid]
+        , (err, results, fields)=>{
+            if (err){
+                console.error(err);
+                res.json({
+                    status: 1,
+                    message: 'query database fail'
+                })
+            }
+            else{
+                res.json({
+                    status: 0,
+                    message: results
+                })
+            }
+            conn.end();
+        }
+    )
+})
 
 app.listen(port, (err)=>{
     if (!err){
