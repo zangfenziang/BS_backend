@@ -6,6 +6,8 @@ mkdir upload
 npm start
 ```
 
+database config in config.js
+
 # Api
 
 ## /upload
@@ -130,5 +132,22 @@ npm start
 {
     token: string,
     mid: int
+}
+```
+
+## /broadcast/send
+
+```
+{
+    token: string,
+    message: string
+}
+```
+
+## /broadcast/list
+
+```
+{
+    token: string
 }
 ```
