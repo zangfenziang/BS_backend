@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jun 26, 2019 at 02:35 PM
+-- Generation Time: Jun 28, 2019 at 03:30 AM
 -- Server version: 10.2.22-MariaDB
 -- PHP Version: 7.2.18
 
@@ -36,8 +36,9 @@ CREATE TABLE `book` (
   `description` text NOT NULL,
   `cover` varchar(50) NOT NULL,
   `link` varchar(100) NOT NULL,
+  `uid` int(11) NOT NULL,
   `status` int(11) NOT NULL,
-  `buyer` int(11) NOT NULL
+  `buyer` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -74,7 +75,7 @@ CREATE TABLE `message` (
 CREATE TABLE `token` (
   `tid` int(11) NOT NULL,
   `uid` int(11) NOT NULL,
-  `token` int(11) NOT NULL,
+  `token` varchar(100) NOT NULL,
   `start_time` timestamp NOT NULL DEFAULT current_timestamp(),
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
