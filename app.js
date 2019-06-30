@@ -238,7 +238,10 @@ app.post(addition + '/user/find', (req, res)=>{
         });
         return;
     }
-    const uid = req.body.uid;
+    let uid = req.body.uid;
+    if (!uid){
+        uid = req.uid;
+    }
     const conn = mysql.createConnection(config.mysql);
     conn.query('select uid, username, email from user where uid = ?', [uid], (err, results, fields)=>{
         if (err){
@@ -626,8 +629,8 @@ app.post(addition + '/message/list', (req, res)=>{
         mid = 0;
     }
     const conn = mysql.createConnection(config.mysql);
-    conn.query('select * from message where mid > ? and to_uid = ?'
-        , [mid, uid]
+    conn.query('select * from message where mid > ? and (to_uid = ? or from_uid = ?)'
+        , [mid, uid, uid]
         , (err, results, fields)=>{
             if (err){
                 console.error(err);
