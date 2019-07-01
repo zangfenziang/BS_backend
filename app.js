@@ -6,7 +6,7 @@ const multer = require('multer');
 const config = require('./config');
 const app = express();
 
-const port = 5000;
+const port = 8080;
 const addition = '/api';
 const upload = multer({ dest: 'upload/' })
 const encodePassword = (password)=>{
