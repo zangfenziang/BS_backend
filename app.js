@@ -6,7 +6,7 @@ const multer = require('multer');
 const config = require('./config');
 const app = express();
 
-const port = 8080;
+const port = 3000;
 const addition = '/api';
 const upload = multer({ dest: 'upload/' })
 const encodePassword = (password)=>{
@@ -228,6 +228,32 @@ app.post(addition + '/user/login', (req, res)=>{
         })
         conn.end();
     }
+})
+
+app.post(addition + '/user/list', (req, res)=>{
+    if (!req.uid){
+        res.json({
+            status: -1,
+            message: 'please login first'
+        });
+        return;
+    }
+    const conn = mysql.createConnection(config.mysql);
+    conn.query('select uid, username, email from user', (err, results, fields)=>{
+        if (err){
+            res.json({
+                status: 0,
+                message: err.message,
+            })
+        }
+        else{
+            res.json({
+                status: 0,
+                user: results
+            })
+        }
+        conn.end();
+    })
 })
 
 app.post(addition + '/user/find', (req, res)=>{
